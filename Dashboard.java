@@ -1,3 +1,5 @@
+package Attendance.Management.System;
+
 
 
 import java.awt.*;
@@ -19,7 +21,11 @@ public class Dashboard extends JFrame implements ActionListener {
     Choice choice1, choice2, choice3;
     JTextField tfusername;
     JButton view, logout, tracker, present, absent, update;
-    JLabel nameofstaff, roleofstaff, emailofstaff;
+    JLabel nameofstaff, roleofstaff, emailofstaff, choicename2;
+    ResultSetMetaData rsmd;
+    DefaultTableModel model;
+    String[] col_name;
+    int rowCount;
 
     JTable table;
 
@@ -89,7 +95,7 @@ public class Dashboard extends JFrame implements ActionListener {
         add(choice1);
 
         //DropDown2
-        JLabel choicename2 = new JLabel("Date");
+        choicename2 = new JLabel("Date");
         choicename2.setBounds(270, 300, 100, 20);
         choicename2.setBackground(new Color(29, 75, 100));
         choicename2.setFont(new Font("Raleway", Font.BOLD, 15));
@@ -141,8 +147,8 @@ public class Dashboard extends JFrame implements ActionListener {
         add(choicename4);
 
         choice3 = new Choice();
-        choice3.add("Sec A");
-        choice3.add("Sec B");
+        choice3.add("A");
+        choice3.add("B");
         choice3.setBounds(670, 323, 150, 40);
         choice3.setBackground(new Color(29, 75, 100));
         choice3.setForeground(Color.WHITE);
@@ -216,11 +222,11 @@ public class Dashboard extends JFrame implements ActionListener {
         table.setBackground(Color.gray);
         table.getTableHeader().setReorderingAllowed(false);
         table.setDragEnabled(false);
-        table.setRowSelectionAllowed(false);
+
         pane.getViewport().add(table);
 
         //Fetching of the data from the database
-        String query = "select regd_no, name, semester, attendance from student";
+        String query ="select regd_no, student_name, semester, section, attendance from mca_student_details where section = 'A'";
         try {
             Conn c = new Conn();
             ResultSet rs = c.s.executeQuery(query);
@@ -228,7 +234,7 @@ public class Dashboard extends JFrame implements ActionListener {
             DefaultTableModel model = (DefaultTableModel) table.getModel();
             //Accessing column name directly from the table in the database
             int cols = rsmd.getColumnCount();
-            String[] col_name = new String[cols];
+            col_name = new String[cols];
             for (int i = 0; i < cols; i++) {
                 col_name[i] = rsmd.getColumnName(i + 1);
             }
@@ -242,37 +248,22 @@ public class Dashboard extends JFrame implements ActionListener {
                 }
                 model.addRow(rowData);
             }
+            rowCount = model.getRowCount();
             table.setModel(model);
 
             //For selecting rows of the table
-            ListSelectionModel selectionModel = table.getSelectionModel();
-            selectionModel.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-
-            selectionModel.addListSelectionListener(new ListSelectionListener() {
+            table.addMouseListener(new MouseAdapter() {
                 @Override
-                public void valueChanged(ListSelectionEvent e) {
-                    // Ignore extra selection events
-                    if (!e.getValueIsAdjusting()) {
-                        int columnToModify = 3; // Index of the column to modify (0-based index)
-                        int[] selectedRows = table.getSelectedRows();
-                        for (int row : selectedRows) {
-                            // Get the current value of the column
-                            Object currentValue = table.getValueAt(row, columnToModify);
-                            // Toggle the value between "Yes" and "No"
-                            Object newValue = currentValue.equals("Yes") ? "No" : "Yes";
-                            // Update the value in the table
-                            table.setValueAt(newValue, row, columnToModify);
-                            hs.add(row);
-                            /* By using this code we can directly update the database by changing in the attendance column by clicking the specific rows
-                              Object changedValue = table.getValueAt(row, columnToModify);
-                              String query = "UPDATE student SET attendance = '" + changedValue + "' WHERE regd_no = '220510200" + (row + 1) + "'";
-                              try{
-                                  c.s.executeUpdate(query);
-                              }catch(Exception ae){
-                                  ae.printStackTrace();
-                              }
-                             */
-                        }
+                public void mouseClicked(MouseEvent e) {
+                    int row = table.rowAtPoint(e.getPoint());
+                    int column = 4;
+                    if (row >= 0 && column == 4) { // Check if click is within bounds and in the Attendance column
+                        // Toggle the value between "Yes" and "No"
+                        String currentValue = (String) table.getValueAt(row, column);
+                        String newValue = currentValue.equals("Yes") ? "No" : "Yes";
+                        hs.add(row);
+                        // Update the value in the table
+                        table.setValueAt(newValue, row, column);
                     }
                 }
             });
@@ -292,23 +283,72 @@ public class Dashboard extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent ae) {
         if (ae.getSource() == tracker) {
 //            setVisible(false);
-            new TrackerPage();
+          //  new TrackerPage();
         }else if(ae.getSource() == update){
-            //Updation of the attendance
-            for(int row : hs){
-                Object changeValue = table.getValueAt(row, 3);
+//            //Updation of the attendance
+//            for(int row : hs){
+//                Object changeValue = table.getValueAt(row, 3);
+//                Conn c = new Conn();
+//                String query = "UPDATE mca_student_details SET attendance = '" + changeValue + "' WHERE sl_no = "+ Integer.toString(row + 1) ;
+//                try{
+//                    c.s.executeUpdate(query);
+//                }catch(Exception e){
+//                    e.printStackTrace();
+//                }
+//            }
+
+            //inserting in new table
+            for(int i = 0;i < rowCount; i++){
+                Object regdno = table.getValueAt(i, 0);
+                Object name = table.getValueAt(i, 1);
+                Object sem = table.getValueAt(i, 2);
+                Object sec = table.getValueAt(i, 3);
+                Object sub = choice2.getSelectedItem();
+                Object attendance = table.getValueAt(i, 4);
+                Object date = tfusername.getText();
+                String query = "insert into mca_student_attendance_update (regd_no, student_name, semester, section, subject, attendance, updated_at) values (\""+regdno+"\", \""+name+"\", \""+sem+"\",\""+sec+"\",\""+sub+"\", \""+attendance+"\", \""+date+"\")";
                 Conn c = new Conn();
-                String query = "UPDATE student SET attendance = '" + changeValue + "' WHERE regd_no = '220510200" + (row + 1) + "'";
                 try{
                     c.s.executeUpdate(query);
                 }catch(Exception e){
                     e.printStackTrace();
                 }
             }
+        }else if(ae.getSource() == view) {
+            table.setModel(new DefaultTableModel(null, col_name));
+            String sem = choice1.getSelectedItem();
+            String sec = choice3.getSelectedItem();
+            String query = "select regd_no, student_name, semester, section, attendance from mca_student_details where semester = '" + sem + "' and section = '" + sec + "'";
+            Conn c = new Conn();
+            try {
+                ResultSet rs = c.s.executeQuery(query);
+                rsmd = rs.getMetaData();
+                model = (DefaultTableModel) table.getModel();
+                //Accessing column name directly from the table in the database
+                int cols = rsmd.getColumnCount();
+                String[] col_name = new String[cols];
+                for (int i = 0; i < cols; i++) {
+                    col_name[i] = rsmd.getColumnName(i + 1);
+                }
+                model.setColumnIdentifiers(col_name);
+
+                //Accessing the data from the table
+                while (rs.next()) {
+                    Object[] rowData = new Object[cols];
+                    for (int i = 0; i < cols; i++) {
+                        rowData[i] = rs.getObject(i + 1);
+                    }
+                    model.addRow(rowData);
+                }
+                rowCount = model.getRowCount();
+                table.setModel(model);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         else if (ae.getSource() == logout) {
             setVisible(false);
-            new SelectBranch();
+            // new SelectBranch();
         }
     }
 }
