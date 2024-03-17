@@ -40,10 +40,10 @@ public class AttendanceTracker extends JFrame implements ActionListener {
         panel1.setBounds(0, 50, 1600, 155);
         add(panel1);
 
-        ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("imgs/Imitlogo.png"));
-        JLabel imagee = new JLabel(i1);
-        imagee.setBounds(80, 3, 150, 150);
-        panel1.add(imagee);
+//        ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("imgs/Imitlogo.png"));
+//        JLabel imagee = new JLabel(i1);
+//        imagee.setBounds(80, 3, 150, 150);
+//        panel1.add(imagee);
 
         // Heading part
         JLabel maintext2 = new JLabel("Attendance Tracker");
@@ -53,10 +53,10 @@ public class AttendanceTracker extends JFrame implements ActionListener {
         panel1.add(maintext2);
 
         // IMIT logo
-        ImageIcon i2 = new ImageIcon(ClassLoader.getSystemResource("imgs/Imitlogo.png"));
-        JLabel image1 = new JLabel(i2);
-        image1.setBounds(1280, 3, 150, 150);
-        panel1.add(image1);
+//        ImageIcon i2 = new ImageIcon(ClassLoader.getSystemResource("imgs/Imitlogo.png"));
+//        JLabel image1 = new JLabel(i2);
+//        image1.setBounds(1280, 3, 150, 150);
+//        panel1.add(image1);
 
         // DropDown1
         JLabel choicename1 = new JLabel("Semester");
@@ -263,9 +263,19 @@ public class AttendanceTracker extends JFrame implements ActionListener {
                             int day = current.get(Calendar.DATE);
                             String formattedMonth = String.format("%02d", month);
                             String formattedDay = String.format("%02d", day);
-                            model.addColumn(year+ "-" + formattedMonth +"-"+ formattedDay);
+                            String col_day = year+ "-" + formattedMonth +"-"+ formattedDay;
+                            model.addColumn(col_day);
                             current.add(Calendar.DATE, 1);
+                            String query1 = "select attendance from mca_student_attendance_update where section = '" + sec + "' and subject = '" + sub + "' and semester = '" + sem + "' and updated_at = '"+col_day+"'";
+                            rs = c.s.executeQuery(query1);
+                            int i = 0;
+                            while(rs.next()){
+                                Object val = rs.getString("attendance");
+                                model.setValueAt(val, i, model.getColumnCount() - 1);
+                                i++;
+                            }
                         }
+
 
                             //Assigning values to the temporary columns
 
