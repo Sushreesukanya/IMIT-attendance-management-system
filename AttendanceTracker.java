@@ -40,10 +40,10 @@ public class AttendanceTracker extends JFrame implements ActionListener {
         panel1.setBounds(0, 50, 1600, 155);
         add(panel1);
 
-        ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("imgs/Imitlogo.png"));
-        JLabel imagee = new JLabel(i1);
-        imagee.setBounds(80, 3, 150, 150);
-        panel1.add(imagee);
+//        ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("imgs/Imitlogo.png"));
+//        JLabel imagee = new JLabel(i1);
+//        imagee.setBounds(80, 3, 150, 150);
+//        panel1.add(imagee);
 
         // Heading part
         JLabel maintext2 = new JLabel("Attendance Tracker");
@@ -53,10 +53,10 @@ public class AttendanceTracker extends JFrame implements ActionListener {
         panel1.add(maintext2);
 
         // IMIT logo
-        ImageIcon i2 = new ImageIcon(ClassLoader.getSystemResource("imgs/Imitlogo.png"));
-        JLabel image1 = new JLabel(i2);
-        image1.setBounds(1280, 3, 150, 150);
-        panel1.add(image1);
+//        ImageIcon i2 = new ImageIcon(ClassLoader.getSystemResource("imgs/Imitlogo.png"));
+//        JLabel image1 = new JLabel(i2);
+//        image1.setBounds(1280, 3, 150, 150);
+//        panel1.add(image1);
 
         // DropDown1
         JLabel choicename1 = new JLabel("Semester");
@@ -231,14 +231,6 @@ public class AttendanceTracker extends JFrame implements ActionListener {
 
                     //Changing the Row values into columns
                     try {
-//                        String query1 = "SELECT DISTINCT updated_at FROM mca_student_attendance_update";
-//                        ResultSet rs1 = c.s.executeQuery(query1);
-
-//                        while (rs1.next()) {
-//                            String val = rs1.getString("updated_at");
-//                            String columnName = val.toString();
-//                            values.add(val);
-                        
                         // Create Calendar instances for start and end dates
                         String[] startDateParts = startdate.split("-");
                         int startYear = Integer.parseInt(startDateParts[0]);
@@ -277,10 +269,32 @@ public class AttendanceTracker extends JFrame implements ActionListener {
                                 i++;
                             }
                         }
+
+                        //Adding a new column total percentage
+                        model.addColumn("Total Percentage");
+                        for(int i = 0; i < model.getRowCount(); i++){
+                            float count = 0;
+                            float classes = 0;
+                            for(int j = 5; j < model.getColumnCount() - 1; j++){
+                                Object value = model.getValueAt(i, j);
+
+                                if(value == null){
+                                    continue;
+                                } else {
+                                    classes++;
+                                }
+                                if(value.equals("Yes")){
+                                    count++;
+                                }
+                            }
+                            float percentage = (count / classes) * 100;
+                            //setting attendance percentage of each student in total percentage column
+                            model.setValueAt(percentage, i, model.getColumnCount() - 1);
+
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-
 
                     // Set width for all columns
                     for (int columnIndex = 0; columnIndex < model.getColumnCount(); columnIndex++) {
