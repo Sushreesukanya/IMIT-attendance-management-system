@@ -40,10 +40,10 @@ public class AttendanceTracker extends JFrame implements ActionListener {
         panel1.setBounds(0, 50, 1600, 155);
         add(panel1);
 
-//        ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("imgs/Imitlogo.png"));
-//        JLabel imagee = new JLabel(i1);
-//        imagee.setBounds(80, 3, 150, 150);
-//        panel1.add(imagee);
+        ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("imgs/Imitlogo.png"));
+        JLabel imagee = new JLabel(i1);
+        imagee.setBounds(80, 3, 150, 150);
+        panel1.add(imagee);
 
         // Heading part
         JLabel maintext2 = new JLabel("Attendance Tracker");
@@ -53,10 +53,10 @@ public class AttendanceTracker extends JFrame implements ActionListener {
         panel1.add(maintext2);
 
         // IMIT logo
-//        ImageIcon i2 = new ImageIcon(ClassLoader.getSystemResource("imgs/Imitlogo.png"));
-//        JLabel image1 = new JLabel(i2);
-//        image1.setBounds(1280, 3, 150, 150);
-//        panel1.add(image1);
+        ImageIcon i2 = new ImageIcon(ClassLoader.getSystemResource("imgs/Imitlogo.png"));
+        JLabel image1 = new JLabel(i2);
+        image1.setBounds(1280, 3, 150, 150);
+        panel1.add(image1);
 
         // DropDown1
         JLabel choicename1 = new JLabel("Semester");
@@ -178,6 +178,7 @@ public class AttendanceTracker extends JFrame implements ActionListener {
         table.setBounds(0, 0, 1150, 400);
         table.setBackground(Color.gray);
         table.getTableHeader().setReorderingAllowed(false);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         pane.getViewport().add(table);
 
 
@@ -189,6 +190,7 @@ public class AttendanceTracker extends JFrame implements ActionListener {
             setVisible(false);
             new Dashboard();
         } else if (ae.getSource() == view) {
+            table.setModel(new DefaultTableModel(null, col_name));
             String startdate=  tfStartDate.getText();
             String enddate = tfEndDate.getText();
             if (!isValidDateFormat(startdate)) {
@@ -202,7 +204,7 @@ public class AttendanceTracker extends JFrame implements ActionListener {
                 String sec = choice3.getSelectedItem();
 
                 //Fetching of the data from the database
-                String query = "select * from mca_student_attendance_update where section = '" + sec + "' and subject = '" + sub + "' and semester = '" + sem + "'";
+                String query = "select distinct regd_no, student_name, semester, section, subject from mca_student_attendance_update where section = '" + sec + "' and subject = '" + sub + "' and semester = '" + sem + "'";
                 try {
                     Conn c = new Conn();
                     ResultSet rs = c.s.executeQuery(query);
@@ -236,8 +238,8 @@ public class AttendanceTracker extends JFrame implements ActionListener {
 //                            String val = rs1.getString("updated_at");
 //                            String columnName = val.toString();
 //                            values.add(val);
+                        
                         // Create Calendar instances for start and end dates
-
                         String[] startDateParts = startdate.split("-");
                         int startYear = Integer.parseInt(startDateParts[0]);
                         int startMonth = Integer.parseInt(startDateParts[1]);
@@ -275,14 +277,14 @@ public class AttendanceTracker extends JFrame implements ActionListener {
                                 i++;
                             }
                         }
-
-
-                            //Assigning values to the temporary columns
-
-//                        }
-
                     } catch (Exception e) {
                         e.printStackTrace();
+                    }
+
+
+                    // Set width for all columns
+                    for (int columnIndex = 0; columnIndex < model.getColumnCount(); columnIndex++) {
+                        table.getColumnModel().getColumn(columnIndex).setPreferredWidth(200); // Set width for all columns to 200 pixels
                     }
 
                     table.setModel(model);
